@@ -7,28 +7,30 @@ from dotenv import load_dotenv
 
 # Загружаем переменные окружения
 load_dotenv()
+HOCKEY_EMAIL = os.getenv("HOCKEY_EMAIL")
+FOOTBALL_EMAIL = os.getenv("FOOTBALL_EMAIL")
 SMTP_SERVER = os.getenv("SMTP_SERVER")
 SMTP_PORT = int(os.getenv("SMTP_PORT"))
 SMTP_USERNAME = os.getenv("SMTP_USERNAME")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
-RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")  # Основной получатель
 
+def send_email(sport, subject, message, cc_emails=None):
+    """Отправка email в зависимости от вида спорта"""
 
-def send_email(subject, message, cc_emails=None):
-    """Отправка email через SMTP"""
+    # Выбираем получателя
+    receiver_email = HOCKEY_EMAIL if sport == "hockey" else FOOTBALL_EMAIL
+
+    # Корректное формирование списка получателей
+    recipients = [receiver_email] + (cc_emails if cc_emails else [])
 
     msg = MIMEMultipart()
     msg["From"] = SMTP_USERNAME
-    msg["To"] = RECEIVER_EMAIL
+    msg["To"] = receiver_email
     msg["Subject"] = subject
+    msg.attach(MIMEText(message, "plain"))
 
     if cc_emails:
         msg["Cc"] = ", ".join(cc_emails)  # Добавляем копии
-        recipients = [RECEIVER_EMAIL] + cc_emails
-    else:
-        recipients = [RECEIVER_EMAIL]
-
-    msg.attach(MIMEText(message, "plain"))
 
     try:
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
@@ -36,7 +38,7 @@ def send_email(subject, message, cc_emails=None):
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
             server.sendmail(SMTP_USERNAME, recipients, msg.as_string())
 
-        logging.info("📧 Email успешно отправлен")
+        logging.info(f"📧 Email успешно отправлен на {receiver_email}")
     except Exception as e:
         logging.error(f"⚠ Ошибка при отправке email: {e}")
 

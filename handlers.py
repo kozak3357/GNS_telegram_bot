@@ -100,14 +100,25 @@ async def get_player_url(update: Update, context: CallbackContext) -> int:
     await update.message.reply_text("Добавьте дополнительную информацию (или напишите 'нет'):")
     return ADDITIONAL_INFO
 
+
 async def get_additional_info(update: Update, context: CallbackContext) -> int:
     """Сохраняем данные и отправляем email"""
-    user_data["additional_info"] = update.message.text.strip()
+
+    # Проверяем, есть ли текст в сообщении
+    additional_info = update.message.text.strip() if update.message.text else "Нет доп. информации"
+    user_data["additional_info"] = additional_info
 
     subject = "📩 Новая заявка на игрока"
-    message = f"🏆 Спорт: {user_data['sport']}\nИмя: {user_data['name']}\nEmail: {user_data['email']}\nТелефон: {user_data['phone']}\nПрофиль: {user_data['player_url']}\nДоп. инфо: {user_data['additional_info']}"
+    message = f"""
+    🏆 Спорт: {user_data['sport']}
+    Имя: {user_data['name']}
+    Email: {user_data['email']}
+    Телефон: {user_data['phone']}
+    Профиль: {user_data['player_url']}
+    Доп. инфо: {user_data['additional_info']}
+    """
 
-    send_email(subject, message)
+    send_email(user_data["sport"], subject, message)  # Отправляем email
 
     await update.message.reply_text("✅ Данные успешно отправлены!")
     return ConversationHandler.END
