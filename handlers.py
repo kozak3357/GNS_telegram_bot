@@ -123,7 +123,7 @@ async def get_additional_info(update: Update, context: CallbackContext) -> int:
     """
 
     send_email(context.user_data["sport"], subject, message)
-    await update.message.reply_text("✅ Данные успешно отправлены!")
+    await update.message.reply_text("✅ Данные успешно отправлены! Мы свяжемся с Вами в течение 2-3 рабочих дней")
     return ConversationHandler.END
 
 
